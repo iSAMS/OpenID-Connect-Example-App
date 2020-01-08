@@ -1,0 +1,7 @@
+## Tell git to treat font files as binary
+*.eot binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+iSAMS.Website/Bin/roslyn/*.exe filter=lfs diff=lfs merge=lfs -text
+iSAMS.Website/Bin/roslyn/*.dll filter=lfs diff=lfs merge=lfs -text
