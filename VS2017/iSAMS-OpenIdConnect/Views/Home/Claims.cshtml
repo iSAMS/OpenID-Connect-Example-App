@@ -1,0 +1,28 @@
+﻿@using Microsoft.AspNetCore.Authentication
+@{
+    ViewData["Title"] = "Contact";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<p>This is a secured page and can only be seen once authenticated.</p>
+
+<dt>Tokens: </dt>
+<dt>access token</dt>
+<dd>@await ViewContext.HttpContext.GetTokenAsync("access_token")</dd>
+
+<dt>refresh token</dt>
+<dd>@await ViewContext.HttpContext.GetTokenAsync("refresh_token")</dd>
+
+<dt>User Claims: </dt>
+<dl>
+    @foreach (var claim in ViewContext.HttpContext.User.Claims)
+    {
+        <dt>
+            @claim.Type
+        </dt>
+        <dd>
+            @claim.Value
+        </dd>
+    }
+</dl>
