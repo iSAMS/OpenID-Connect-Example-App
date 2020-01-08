@@ -1,0 +1,1 @@
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="iSAMS_OpenIdConnect.MvcApplication" Language="C#" %>

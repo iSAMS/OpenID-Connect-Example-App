@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Application uses</h2>
+        <p>
+            This application is an example application utilising single sign-on using OpenID Connect against
+            the iSAMS Authentication Server, hosted on the <a href="https://developerdemo.isams.cloud/framework">iSAMS Developer Demo.</a>
+        </p>
+        <p>To login, select any page from the menu apart from the homepage, which require authentication.</p>
+        <p>"<a href="@Url.Action("MakeApiCall", "Home")">Make an API Call</a>" can be selected to see how an access token can be used to call an iSAMS API. This makes a call to the iSAMS REST API to get all buildings.</p>
+    </div>
+</div>
