@@ -11,15 +11,18 @@ namespace iSAMS_OpenIdConnect
 {
     public class Startup
     {
-        private const string Authority = "https://developerdemo.isams.cloud/auth";
-        private const string ClientId = "isams.oidc.demo";
+        private const string Authority = Domain + "/auth";
 
-        private const string ClientSecret = "40019D7D-7641-4A54-9F8C-9FF08AEC0614";
+        private const string Domain = "https://developerdemo.isams.cloud"; // <= your_host_here (without a trailing /)
 
-        // Set required response type(s), see https://developer-beta.isams.com/docs/getting-started-single-sign-on#section-single-sign-on
+        private const string ClientId = "isams.oidc.demo"; // <= your_client_id_here
+
+        private const string ClientSecret = "40019D7D-7641-4A54-9F8C-9FF08AEC0614"; // <= your_client_secret_here
+
+        // Set required response type(s), see https://developer.isams.com/docs/getting-started-single-sign-on#section-single-sign-on
         private const string ResponseType = "code id_token token";
 
-        // Add required scopes, see https://developer-beta.isams.com/docs/scopes
+        // Add required scopes, see https://developer.isams.com/docs/scopes
         private const string ScopesCsv = "openid,email,profile";
 
         public Startup(IConfiguration configuration)
@@ -55,7 +58,7 @@ namespace iSAMS_OpenIdConnect
                     options.RequireHttpsMetadata = false;
                     options.ResponseType = ResponseType;
 
-                    // Add required scopes, see https://developer-beta.isams.com/docs/scopes
+                    // Add required scopes, see https://developer.isams.com/docs/scopes
                     options.Scope.Clear();
                     foreach (var scope in ScopesCsv.Split(',', StringSplitOptions.RemoveEmptyEntries))
                     {
