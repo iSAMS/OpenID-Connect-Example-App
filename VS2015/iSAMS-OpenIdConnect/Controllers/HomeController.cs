@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
+using IdentityModel;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
 
-//https://developer.okta.com/quickstart/#/okta-sign-in-page/dotnet/aspnet4
 namespace iSAMS_OpenIdConnect.Controllers
 {
     public class HomeController : Controller
@@ -23,9 +28,9 @@ namespace iSAMS_OpenIdConnect.Controllers
 
         public ActionResult Logout()
         {
-            //return new SignOutResult(new[]
-            //    {OpenIdConnectDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme});
-            return null;
+            HttpContext.GetOwinContext().Authentication.SignOut(OpenIdConnectAuthenticationDefaults.AuthenticationType,
+                CookieAuthenticationDefaults.AuthenticationType);
+            return Index();
         }
 
         [Authorize]
@@ -33,11 +38,13 @@ namespace iSAMS_OpenIdConnect.Controllers
         {
             using (var httpClient = new HttpClient())
             {
-                var accessToken = (string) null; //await HttpContext.GetTokenAsync("access_token");
+                httpClient.BaseAddress = new Uri(Startup.Domain);
 
-                httpClient.BaseAddress = new Uri("https://developerdemo.isams.cloud");
                 httpClient.DefaultRequestHeaders.Accept.Clear();
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var identityClaims = ClaimsPrincipal.Current.Identities.First().Claims;
+                var accessToken = identityClaims.First(x => x.Type == OidcConstants.TokenTypes.AccessToken).Value;
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
                 var httpRequest = new HttpRequestMessage(HttpMethod.Get, "api/estates/buildings");
@@ -45,7 +52,7 @@ namespace iSAMS_OpenIdConnect.Controllers
                 var response = await httpClient.SendAsync(httpRequest, CancellationToken.None);
                 var result = await response.Content.ReadAsStringAsync();
 
-                return View("MakeApiCall", result);
+                return View("MakeApiCall", (object) result);
             }
         }
     }

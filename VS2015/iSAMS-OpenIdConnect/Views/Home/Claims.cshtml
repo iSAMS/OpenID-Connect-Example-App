@@ -1,28 +1,39 @@
-﻿@*@using Microsoft.AspNetCore.Authentication
+﻿@using System.Security.Claims
+@using IdentityModel
+
 @{
     ViewData["Title"] = "Contact";
-}*@
+    var identityClaims = ClaimsPrincipal.Current.Identities.First().Claims.ToList();
+}
 <h2>@ViewData["Title"]</h2>
 <h3>@ViewData["Message"]</h3>
 
 <p>This is a secured page and can only be seen once authenticated.</p>
 
-<dt>Tokens: </dt>
+<dt>Tokens:</dt>
 <dt>access token</dt>
-@*<dd>@await ViewContext.HttpContext.GetTokenAsync("access_token")</dd>*@
+<dd>@(identityClaims.FirstOrDefault(x => x.Type == OidcConstants.TokenTypes.AccessToken)?.Value ?? "[not found]")</dd>
 
 <dt>refresh token</dt>
-@*<dd>@await ViewContext.HttpContext.GetTokenAsync("refresh_token")</dd>*@
+<dd>@(identityClaims.FirstOrDefault(x => x.Type == OidcConstants.TokenTypes.RefreshToken)?.Value ?? "[not found]")</dd>
+<br />
 
-<dt>User Claims: </dt>
+<dt>User Claims (excluding the Tokens above): </dt>
 <dl>
-    @*@foreach (var claim in ViewContext.HttpContext.User.Claims)
+    @if (identityClaims.Count == 0)
     {
-        <dt>
-            @claim.Type
-        </dt>
-        <dd>
-            @claim.Value 
-        </dd>
-    }*@
+        <text>[none]</text>
+    }
+    else
+    {
+        foreach (var claim in identityClaims.Where(x => x.Type != OidcConstants.TokenTypes.AccessToken && x.Type != OidcConstants.TokenTypes.RefreshToken))
+        {
+            <dt>
+                @claim.Type
+            </dt>
+            <dd>
+                @(string.IsNullOrWhiteSpace(claim.Value) ? "[not found]" : claim.Value)
+            </dd>
+        }
+    }
 </dl>

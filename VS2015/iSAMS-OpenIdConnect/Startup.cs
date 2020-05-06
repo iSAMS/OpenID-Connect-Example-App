@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +20,7 @@ namespace iSAMS_OpenIdConnect
     {
         private const string Authority = Domain + "/auth";
 
-        private const string Domain = "https://developerdemo.isams.cloud"; // <= your_host_here (without a trailing /)
+        public const string Domain = "https://developerdemo.isams.cloud"; // <= your_host_here (without a trailing /)
 
         private const string ClientId = "isams.oidc.demo"; // <= your_client_id_here
 
@@ -34,9 +35,13 @@ namespace iSAMS_OpenIdConnect
         public void Configuration(IAppBuilder app)
         {
             var redirectUri = "http://localhost:52102/signin-oidc";
-            var postLogoutRedirectUri = "http://localhost:52102/signout-callback-oidc";
+            var postLogoutRedirectUri = "http://localhost:52102/";
 
             app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                CookieSecure = CookieSecureOption.Never
+            });
 
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
@@ -47,7 +52,7 @@ namespace iSAMS_OpenIdConnect
                 RedirectUri = redirectUri,
                 RequireHttpsMetadata = false,
                 ResponseType = ResponseType,
-                // Add required scopes, see https://developer-beta.isams.com/docs/scopes
+                // Add required scopes, see https://developer.isams.com/docs/scopes
                 Scope = ScopesCsv.Replace(",", " "),
                 TokenValidationParameters = new TokenValidationParameters
                 {
@@ -71,12 +76,12 @@ namespace iSAMS_OpenIdConnect
                         var userInfoResponse = await userInfoClient.GetAsync(tokenResponse.AccessToken);
                         var claims = new List<Claim>();
                         claims.AddRange(userInfoResponse.Claims);
-                        claims.Add(new Claim("id_token", tokenResponse.IdentityToken));
-                        claims.Add(new Claim("access_token", tokenResponse.AccessToken));
+                        claims.Add(new Claim(OidcConstants.TokenTypes.IdentityToken, tokenResponse.IdentityToken));
+                        claims.Add(new Claim(OidcConstants.TokenTypes.AccessToken, tokenResponse.AccessToken));
 
                         if (!string.IsNullOrEmpty(tokenResponse.RefreshToken))
                         {
-                            claims.Add(new Claim("refresh_token", tokenResponse.RefreshToken));
+                            claims.Add(new Claim(OidcConstants.TokenTypes.RefreshToken, tokenResponse.RefreshToken));
                         }
 
                         n.AuthenticationTicket.Identity.AddClaims(claims);
@@ -87,7 +92,8 @@ namespace iSAMS_OpenIdConnect
                         // If signing out, add the id_token_hint
                         if (n.ProtocolMessage.RequestType == OpenIdConnectRequestType.Logout)
                         {
-                            var idTokenClaim = n.OwinContext.Authentication.User.FindFirst("id_token");
+                            var idTokenClaim =
+                                n.OwinContext.Authentication.User.FindFirst(OidcConstants.TokenTypes.IdentityToken);
 
                             if (idTokenClaim != null)
                             {
