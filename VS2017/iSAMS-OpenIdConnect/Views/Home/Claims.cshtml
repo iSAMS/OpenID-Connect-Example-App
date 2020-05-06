@@ -1,6 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Authentication
+
 @{
     ViewData["Title"] = "Contact";
+    var identityClaims = ViewContext.HttpContext.User.Claims.ToList();
 }
 <h2>@ViewData["Title"]</h2>
 <h3>@ViewData["Message"]</h3>
@@ -9,20 +11,28 @@
 
 <dt>Tokens: </dt>
 <dt>access token</dt>
-<dd>@await ViewContext.HttpContext.GetTokenAsync("access_token")</dd>
+<dd>@(await ViewContext.HttpContext.GetTokenAsync("access_token") ?? "[not found]")</dd>
 
 <dt>refresh token</dt>
-<dd>@await ViewContext.HttpContext.GetTokenAsync("refresh_token")</dd>
+<dd>@(await ViewContext.HttpContext.GetTokenAsync("refresh_token") ?? "[not found]")</dd>
+<br />
 
-<dt>User Claims: </dt>
+<dt>User Claims (excluding the Tokens above): </dt>
 <dl>
-    @foreach (var claim in ViewContext.HttpContext.User.Claims)
+    @if (identityClaims.Count == 0)
     {
-        <dt>
-            @claim.Type
-        </dt>
-        <dd>
-            @claim.Value
-        </dd>
+        <text>[none]</text>
+    }
+    else
+    {
+        foreach (var claim in identityClaims.Where(x => x.Type != "access_token" && x.Type != "refresh_token"))
+        {
+            <dt>
+                @claim.Type
+            </dt>
+            <dd>
+                @(string.IsNullOrWhiteSpace(claim.Value) ? "[not found]" : claim.Value)
+            </dd>
+        }
     }
 </dl>
