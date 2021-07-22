@@ -38,7 +38,7 @@ namespace iSAMS_OpenIdConnect.Controllers
         {
             using (var httpClient = new HttpClient())
             {
-                httpClient.BaseAddress = new Uri(Startup.Domain);
+                httpClient.BaseAddress = new Uri(Startup.IsamsDomain);
 
                 httpClient.DefaultRequestHeaders.Accept.Clear();
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
